@@ -60,7 +60,10 @@ class ViewButton(QtWidgets.QWidget):
         designer = ViewDesignerDialog(self._view, self._asset_universe)
         result = designer.exec_()
         if result:
-            print("done")
+            updated_view = designer.get_view()
+            if self._view != updated_view:
+                self._view = updated_view
+                self._name_label.setText(self._view.name)
 
         designer.deleteLater()
 

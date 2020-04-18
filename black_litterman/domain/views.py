@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from dataclasses import dataclass
 from typing import List, Optional
-
+from uuid import uuid4
 
 class ViewAllocation:
 
@@ -31,11 +31,21 @@ class ViewAllocation:
 @dataclass(frozen=True)
 class View:
 
-    id: int
+    id: str
     name: str
     out_performance: float
     confidence: float
     allocation: ViewAllocation
+
+    @ staticmethod
+    def get_new_view_with_defaults(asset: str):
+        view_id = uuid4().hex
+        name = "New view"
+        outperformance = 0
+        confidence = 0
+        allocation = ViewAllocation(asset)
+
+        return View(view_id, name, outperformance, confidence, allocation)
 
 
 class ViewCollection:

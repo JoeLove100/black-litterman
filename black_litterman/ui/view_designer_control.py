@@ -114,6 +114,7 @@ class ViewDesignerDialog(QtWidgets.QDialog):
         self._outperf_up_down.setValue(view.out_performance)
 
         self._allocation_group.setTitle("View allocation")
+
         if view.allocation.view_type == ViewAllocation.ABSOLUTE:
             self._allocation_control = AllocationControlAbsolute(view.allocation, asset_universe)
         else:
@@ -124,7 +125,7 @@ class ViewDesignerDialog(QtWidgets.QDialog):
 
         self._confidence_slider.valueChanged.connect(self._display_confidence)
         self._view_type_combo.currentTextChanged.connect(self._set_allocation_control)
-        self._save_button.clicked.connect(self.accept)
+        self._save_button.clicked.connect(self.on_click_ok)
         self._exit_button.clicked.connect(self.reject)
 
     def _add_controls_to_layout(self):
@@ -194,7 +195,8 @@ class ViewDesignerDialog(QtWidgets.QDialog):
         view = View(view_id, name, out_performance, confidence, allocation)
         return view
 
-
+    def get_view(self):
+        return self._view
 
 
 if __name__ == "__main__":
