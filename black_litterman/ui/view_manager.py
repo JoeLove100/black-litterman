@@ -49,6 +49,11 @@ class ViewManager(QtWidgets.QWidget):
         button = ViewButton(view=new_view, asset_universe=self._asset_universe)
         button.setFixedHeight(75)
         self._views_panel.layout().addWidget(button)
+        button.delete_clicked.connect(self._delete_button)
+
+    def _delete_button(self,
+                       button):
+        button.setParent(None)
 
 
 if __name__ == "__main__":

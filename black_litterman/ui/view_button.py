@@ -6,6 +6,8 @@ from black_litterman.ui.view_designer_control import ViewDesignerDialog
 
 class ViewButton(QtWidgets.QWidget):
 
+    delete_clicked = QtCore.Signal(QtWidgets.QWidget)
+
     def __init__(self,
                  view: View,
                  asset_universe: List[str]):
@@ -40,6 +42,7 @@ class ViewButton(QtWidgets.QWidget):
     def _add_event_handlers(self):
 
         self._edit_button.clicked.connect(self._show_designer)
+        self._delete_button.clicked.connect(self._clicked_delete)
 
     def _add_controls_to_layout(self):
 
@@ -67,6 +70,8 @@ class ViewButton(QtWidgets.QWidget):
 
         designer.deleteLater()
 
+    def _clicked_delete(self):
+        self.delete_clicked.emit(self)
 
 if __name__ == "__main__":
 
