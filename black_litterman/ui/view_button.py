@@ -82,7 +82,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setFont(QtGui.QFont("Arial", 10))
 
-    v = View(1, "Bonds outperform equity", 0.5, 2, ViewAllocation("test_1"))
+    v = View("1", "Bonds outperform equity", 0.5, 2, ViewAllocation("test_1"))
     widget = ViewButton(v, ["asset_1", "asset_2", "asset_3", "asset_4"])
     widget.setWindowTitle("View button")
     widget.resize(30, 100)

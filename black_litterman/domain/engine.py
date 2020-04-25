@@ -6,7 +6,7 @@ from black_litterman.market_data.data_readers import BaseDataReader
 from black_litterman.domain.views import ViewCollection
 
 
-@dataclass
+@dataclass(frozen=False)
 class CalculationSettings:
 
     tau: float
