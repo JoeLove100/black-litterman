@@ -15,6 +15,7 @@ class MarketData:
     PRICE_DATA = "price_data"
     MARKET_CAP_DATA = "market_cap_data"
 
-    def _get_data_types(self) -> List[str]:
+    @classmethod
+    def get_data_types(cls) -> List[str]:
 
-        return [self.PRICE_DATA, self.MARKET_CAP_DATA]
+        return [cls.PRICE_DATA, cls.MARKET_CAP_DATA]
