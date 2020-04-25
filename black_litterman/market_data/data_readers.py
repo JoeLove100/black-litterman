@@ -46,7 +46,6 @@ class BaseDataReader(ABC):
         return data_engine
 
 
-
 class LocalDataReader(BaseDataReader):
     """
     read in data from a local spreadsheet
@@ -59,7 +58,7 @@ class LocalDataReader(BaseDataReader):
 
     def _read_raw_data(self) -> Dict[str, pd.DataFrame]:
 
-        raw_data = pd.read_excel(self._path, sheet_name=self._get_data_types(), index_col=0)
+        raw_data = pd.read_excel(self._path, sheet_name=MarketData.get_data_types(), index_col=0)
         return raw_data
 
     def _validate_data(self, raw_data: Dict[str, pd.DataFrame]) -> None:

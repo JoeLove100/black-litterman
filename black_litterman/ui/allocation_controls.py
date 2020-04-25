@@ -25,7 +25,7 @@ class AllocationControlAbsolute(QtWidgets.QWidget):
                              asset_universe: List[str]) -> None:
 
         self._long_asset_combo.addItems(asset_universe)
-        self._long_asset_combo.setCurrentText(allocation.long_assert)
+        self._long_asset_combo.setCurrentText(allocation.long_asset)
 
     def _add_controls_to_layout(self):
 
@@ -75,7 +75,7 @@ class AllocationControlRelative(QtWidgets.QWidget):
                              asset_universe: List[str]) -> None:
 
         self._long_asset_combo.addItems(asset_universe)
-        self._long_asset_combo.setCurrentText(allocation.long_assert)
+        self._long_asset_combo.setCurrentText(allocation.long_asset)
 
         self._short_asset_combo.addItems(asset_universe)
         self._short_asset_combo.setCurrentIndex(0)
