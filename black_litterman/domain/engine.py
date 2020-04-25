@@ -30,7 +30,7 @@ class BLEngine:
                                     calc_settings: CalculationSettings) -> pd.Series:
 
         market_weights = self._market_data_engine.get_market_weights(calc_settings.start_date)
-        market_cov = self._market_data_engine.get_cov_matrix(calc_settings.start_date, calc_settings.calculation_date)
+        market_cov = self._market_data_engine.get_annualised_cov_matrix(calc_settings.start_date, calc_settings.calculation_date)
 
         view_mat = self._view_collection.get_view_matrix(calc_settings.asset_universe)
         view_cov = self._view_collection.get_view_cov_matrix()

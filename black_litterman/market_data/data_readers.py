@@ -3,15 +3,12 @@ from logging import getLogger
 from typing import Dict, List
 from abc import ABC, abstractmethod
 from black_litterman.market_data.engine import MarketDataEngine
-from black_litterman.constants import Configuration
+from black_litterman.constants import Configuration, MarketData
 
 logger = getLogger()
 
 
 class BaseDataReader(ABC):
-
-    PRICE_DATA = "price_data"
-    MARKET_CAP_DATA = "market_cap_data"
 
     @abstractmethod
     def _read_raw_data(self) -> Dict[str, pd.DataFrame]:
@@ -44,13 +41,10 @@ class BaseDataReader(ABC):
         raw_data = self._read_raw_data()
         self._validate_data(raw_data)
         formatted_data = self._get_formatted_data(raw_data)
-        data_engine = MarketDataEngine(formatted_data[self.PRICE_DATA],
-                                       formatted_data[self.MARKET_CAP_DATA])
+        data_engine = MarketDataEngine(formatted_data[MarketData.PRICE_DATA],
+                                       formatted_data[MarketData.MARKET_CAP_DATA])
         return data_engine
 
-    def _get_data_types(self) -> List[str]:
-
-        return [self.PRICE_DATA, self.MARKET_CAP_DATA]
 
 
 class LocalDataReader(BaseDataReader):
