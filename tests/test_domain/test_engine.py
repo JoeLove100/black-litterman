@@ -63,3 +63,17 @@ class TestEngine(unittest.TestCase):
         # assert
         expected_result = pd.Series([0.2982666, 0.6179881, 0.1043762], index=market_cov.index)
         pd.testing.assert_series_equal(expected_result, result)
+
+    def test_get_sum_squares(self):
+        # arrange
+        series_1 = pd.Series([0.5, 0.25, 0.75, 0.3])
+        series_2 = pd.Series([0.2, 0.3, 0.75, 0.4])
+
+        # act
+        result = BLEngine._get_sum_squares_error(series_1, series_2)
+
+        # assert
+        self.assertAlmostEqual(0.1025, result)
+
+
+
