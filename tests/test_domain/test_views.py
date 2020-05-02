@@ -98,7 +98,7 @@ class TestViews(unittest.TestCase):
         view_collection = self._get_view_collection("")
 
         # act
-        result = view_collection.get_view_cov_matrix()
+        result = view_collection.get_view_confidence_matrix()
 
         # assert
         expected_result = pd.DataFrame([[0.5, 0, 0], [0, 0.9, 0], [0, 0, 0.2]],

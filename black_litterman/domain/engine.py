@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
+from scipy import optimize
 from typing import List
 from dataclasses import dataclass
 from black_litterman.market_data.data_readers import BaseDataReader
-from black_litterman.domain.views import ViewCollection
+from black_litterman.domain.views import ViewCollection, View
 
 
 @dataclass(frozen=False)
@@ -32,17 +33,40 @@ class BLEngine:
         portfolio optimisation model
         """
 
+        # get the market data
         market_weights = self._market_data_engine.get_market_weights(calc_settings.start_date)
         market_cov = self._market_data_engine.get_annualised_cov_matrix(calc_settings.start_date,
                                                                         calc_settings.calculation_date)
 
+        # get the view specific data
         view_mat = self._view_collection.get_view_matrix(calc_settings.asset_universe)
-        view_cov = self._view_collection.get_view_cov_matrix()
         view_out_performance = self._view_collection.get_view_out_performances()
+        view_cov = self.get_view_covariances_from_confidences(market_weights, market_cov, calc_settings)
 
+        # calc BL weights
         bl_weights = self._get_weights(market_weights, market_cov, view_mat, view_cov, view_out_performance,
                                        calc_settings)
         return bl_weights
+
+    def get_view_covariances_from_confidences(self,
+                                              market_weights: pd.Series,
+                                              market_covariance: pd.DataFrame,
+                                              calc_settings: CalculationSettings) -> pd.DataFrame:
+        """
+        build a diagonal covariance matrix from the views
+        based on the confidence in each view
+        """
+
+        cov_by_view = dict()
+        all_views = self._view_collection.get_all_views()
+
+        for view in all_views:
+            var = self._confidence_to_variance(view, calc_settings, market_weights, market_covariance)
+            cov_by_view.update({view.id: var})
+
+        var_series = pd.Series(cov_by_view)
+        cov_matrix = pd.DataFrame(np.diag(var_series), index=var_series.index, columns=var_series.index)
+        return cov_matrix
 
     @staticmethod
     def _get_weights(market_weights: pd.Series,
@@ -64,6 +88,66 @@ class BLEngine:
 
         bl_weights = market_weights + view_matrix.T.dot(mat_1_inv).dot(mat_2)
         return bl_weights
+
+    def _get_view_target_weights(self,
+                                 view: View,
+                                 calc_settings: CalculationSettings,
+                                 market_weights: pd.Series,
+                                 market_covariance: pd.DataFrame,
+                                 view_matrix: pd.DataFrame,
+                                 view_out_performance: pd.Series) -> pd.Series:
+        """
+        get target weights based on the view allocation and
+        stated confidence in the view
+        """
+
+        zero_view_cov = pd.DataFrame([0], index=View.id, columns=View.id)
+        full_confidence_weights = self._get_weights(market_weights, market_covariance, view_matrix, zero_view_cov,
+                                                    view_out_performance, calc_settings)
+        max_weight_difference = full_confidence_weights - market_weights
+        target_weights = market_weights.add(view.confidence * max_weight_difference)
+
+        return target_weights
+
+    @staticmethod
+    def _get_sum_squares_error(series_1: pd.Series,
+                               series_2: pd.Series) -> float:
+        """
+        get the sum squared errors between two
+        series
+        """
+
+        diff = series_1.subtract(series_2)
+        sum_square = sum([x ** 2 for x in diff])
+        return sum_square
+
+    def _confidence_to_variance(self,
+                            view: View,
+                            calc_settings: CalculationSettings,
+                            market_weights: pd.Series,
+                            market_covariance: pd.DataFrame):
+        """
+        convert a view confidence level to a variance
+        """
+
+        view_matrix = view.get_view_data_frame(calc_settings.asset_universe)
+        view_out_performance = pd.Series([view.out_performance], index=[view.id])
+        target_weights = self._get_view_target_weights(view, calc_settings, market_weights, market_covariance,
+                                                       view_matrix, view_out_performance)
+
+        def _error_vs_target_weights(var) -> float:
+
+            view_cov = pd.DataFrame([var], index=view.id, columns=view.id)
+            weights_for_cov = self._get_weights(market_weights, market_covariance, view_matrix, view_cov,
+                                                view_out_performance, calc_settings)
+
+            return self._get_sum_squares_error(weights_for_cov, target_weights)
+
+        variance = optimize.minimize(_error_vs_target_weights, np.array(0.1))
+        return variance
+
+
+
 
 
 

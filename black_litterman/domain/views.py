@@ -48,6 +48,17 @@ class View:
 
         return View(view_id, name, out_performance, confidence, allocation)
 
+    def get_view_data_frame(self,
+                            asset_universe: List[str]) -> pd.DataFrame:
+        view_series = pd.Series([0] * len(asset_universe), index=asset_universe, name=self.id)
+
+        view_series[self.allocation.long_asset] = 1
+        if self.allocation.short_asset is not None:
+            view_series[self.allocation.short_asset] = -1
+
+        view_data_frame = view_series.T.to_frame()
+        return view_data_frame
+
 
 class ViewCollection:
 
@@ -66,22 +77,22 @@ class ViewCollection:
         view = self._all_views[view_id]
         return view
 
+    def get_all_views(self) -> List[View]:
+
+        return list(self._all_views.values())
+
     def get_view_matrix(self,
                         asset_universe: List[str]) -> pd.DataFrame:
 
-        allocations = []
-        for view_id, view in self._all_views.items():
-            allocation_for_view = pd.Series([0] * len(asset_universe), index=asset_universe, name=view_id)
-            allocation_for_view[view.allocation.long_asset] = 1
-            if view.allocation.short_asset:
-                allocation_for_view[view.allocation.short_asset] = -1
+        all_view_data_frames = []
+        for view in self._all_views.values():
+            view_data_frame = view.get_view_data_frame(asset_universe)
+            all_view_data_frames.append(view_data_frame)
 
-            allocations.append(allocation_for_view)
-
-        if not allocations:
+        if not all_view_data_frames:
             return pd.DataFrame()
         else:
-            view_matrix = pd.concat(allocations, axis=1).T
+            view_matrix = pd.concat(all_view_data_frames, axis=1)
             return view_matrix
 
     def get_view_out_performances(self) -> pd.Series:
@@ -89,7 +100,7 @@ class ViewCollection:
         out_performances = pd.Series({view_id: view.out_performance for view_id, view in self._all_views.items()})
         return out_performances
 
-    def get_view_cov_matrix(self) -> pd.DataFrame:
+    def get_view_confidence_matrix(self) -> pd.DataFrame:
 
         uncertainties = pd.Series({view_id: view.confidence for view_id, view in self._all_views.items()})
         cov_matrix = pd.DataFrame(np.diag(uncertainties), index=uncertainties.index, columns=uncertainties.index)
