@@ -57,7 +57,7 @@ class BLEngine:
 
         mat_1 = (view_cov.divide(calc_settings.tau) +
                  view_matrix.dot(market_cov).dot(view_matrix.T))
-        mat_1_inv = pd.DataFrame(np.invert(mat_1.values),
+        mat_1_inv = pd.DataFrame(np.linalg.inv(mat_1.values),
                                  index=mat_1.index, columns=mat_1.index)
         mat_2 = (view_out_performance.divide(calc_settings.risk_aversion)
                  - view_matrix.dot(market_cov).dot(market_weights))
