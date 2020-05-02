@@ -53,7 +53,7 @@ class TestViews(unittest.TestCase):
         result = view_collection.get_view_matrix(asset_universe)
 
         # assert
-        expected_result = pd.Series([0, 1, 0, 0], index=asset_universe, name="1").to_frame()
+        expected_result = pd.Series([0, 1, 0, 0], index=asset_universe, name="1").to_frame().T
         pd.testing.assert_frame_equal(expected_result, result)
 
     def test_get_view_matrix_relative(self):

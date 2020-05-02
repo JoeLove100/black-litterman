@@ -93,7 +93,7 @@ class ViewCollection:
             return pd.DataFrame()
         else:
             view_matrix = pd.concat(all_view_data_frames, axis=1)
-            return view_matrix
+            return view_matrix.T
 
     def get_view_out_performances(self) -> pd.Series:
 
