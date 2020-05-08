@@ -56,7 +56,7 @@ class View:
         if self.allocation.short_asset is not None:
             view_series[self.allocation.short_asset] = -1
 
-        view_data_frame = view_series.T.to_frame()
+        view_data_frame = view_series.to_frame().T
         return view_data_frame
 
 
