@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 from black_litterman.market_data.data_readers import BaseDataReader
 from black_litterman.domain.views import ViewCollection, View
-from black_litterman.constants import Configuration
+from black_litterman.constants import Configuration, Weights
 
 
 @dataclass(frozen=False)
@@ -44,6 +44,23 @@ class BLEngine:
         else:
             self._view_collection = view_collection
 
+    def get_market_weights(self) -> pd.Series:
+        """
+        return the implied market clearing weights
+        """
+
+        weights = self._market_data_engine.get_market_weights(self._calc_settings.calculation_date)
+        weights.name = Weights.MARKET
+        return weights
+
+    def get_asset_universe(self) -> List[str]:
+        """
+        return the names of the current available assets from the
+        calculation settings
+        """
+
+        return list(self._calc_settings.asset_universe.keys())
+
     def get_black_litterman_weights(self) -> pd.Series:
         """
         derive target portfolio weights based on the Black-Litterman
@@ -62,6 +79,7 @@ class BLEngine:
 
         # calc BL weights
         bl_weights = self._get_weights(market_weights, market_cov, view_mat, view_cov, view_out_performance)
+        bl_weights.name = Weights.BLACK_LITTERMAN
         return bl_weights
 
     def get_view_covariances_from_confidences(self,

@@ -1,6 +1,8 @@
+import pandas as pd
 from typing import Dict, List
 from PySide2 import QtWidgets
 from PySide2.QtCharts import QtCharts
+from black_litterman.constants import Weights
 
 
 class PortfolioChart(QtWidgets.QWidget):
@@ -22,23 +24,33 @@ class PortfolioChart(QtWidgets.QWidget):
         self.setLayout(self._layout)
 
     def draw_chart(self,
-                   all_weights: Dict[str, Dict[str, float]],
-                   asset_universe: List[str]) -> None:
+                   asset_universe: List[str],
+                   *args: pd.Series) -> None:
 
+        asset_universe = [s.replace(" ", "<br>") for s in asset_universe]  # no word wrap for some reason
         bar_series = QtCharts.QBarSeries()
-        for name, weights in all_weights.items():
+        for weights in args:
 
-            bar_set = QtCharts.QBarSet(name)
-            bar_set.append(weights.values())
+            bar_set = QtCharts.QBarSet(str(weights.name))
+            bar_set.append(weights.mul(100).values.tolist())
             bar_series.append(bar_set)
 
         chart = QtCharts.QChart()
         chart.addSeries(bar_series)
+        bar_series.setLabelsFormat('{:.0%}')
 
-        axis = QtCharts.QBarCategoryAxis()
-        axis.append(asset_universe)
+        axis_x = QtCharts.QBarCategoryAxis()
+        axis_x.append(asset_universe)
         chart.createDefaultAxes()
-        chart.setAxisX(axis)
+        chart.setAxisX(axis_x)
+
+        axis_y = QtCharts.QValueAxis()
+        axis_y.setMax(50)
+        axis_y.setMin(0)
+        axis_y.setTickCount(6)
+        axis_y.setLabelFormat("%.0f")
+        chart.setAxisY(axis_y)
+        bar_series.attachAxis(axis_y)
 
         chart.legend().setVisible(True)
 

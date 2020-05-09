@@ -24,10 +24,12 @@ class BlackLittermanApp(QtWidgets.QWidget):
 
     def _create_controls(self):
         self._main_chart = PortfolioChart()
-        self._view_manager = ViewManager({}, ["asset_1", "asset_2", "asset_3", "asset_4"])
+        self._view_manager = ViewManager({}, self._engine.get_asset_universe())
 
     def _initialise_controls(self):
-        self._main_chart.draw_chart({"Government Bonds": 0.4, "World Equity": 0.6})
+        market_weights = self._engine.get_market_weights()
+        asset_universe = self._engine.get_asset_universe()
+        self._main_chart.draw_chart(asset_universe, market_weights)
 
     def _add_controls_to_layout(self):
         layout = QtWidgets.QGridLayout()
