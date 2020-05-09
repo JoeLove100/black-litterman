@@ -27,7 +27,7 @@ class BaseDataReader(ABC):
 
     @abstractmethod
     def _get_formatted_data(self,
-                            raw_data: Dict[str, pd.DataFrame]) -> pd.DataFrame:
+                            raw_data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
         """
         apply type formatting
         to the data
@@ -66,9 +66,9 @@ class LocalDataReader(BaseDataReader):
         pass
         # TODO: should add in some validation here
 
-    def _get_formatted_data(self, raw_data: pd.DataFrame) -> pd.DataFrame:
+    def _get_formatted_data(self, raw_data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
 
-        for data in raw_data:
+        for data in raw_data.values():
             data.index = pd.to_datetime(data.index)
 
         return raw_data
@@ -83,11 +83,11 @@ class SqlDataReader(BaseDataReader):
         raise NotImplementedError()
 
     def _validate_data(self,
-                       raw_data: Dict[str, pd.DataFrame]):
+                       raw_data: Dict[str, pd.DataFrame]) -> None:
         raise NotImplementedError()
 
     def _get_formatted_data(self,
-                            raw_data: Dict[str, pd.DataFrame]):
+                            raw_data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
         raise NotImplementedError()
 
 
@@ -105,12 +105,15 @@ class DataReaderFactory:
     def get_data_reader(cls,
                         config: Dict) -> BaseDataReader:
 
-        data_source = config.get(Configuration.MARKET_DATA_SOURCE, "Not Defined")
+        config_data = config[Configuration.MARKET_DATA]
+        data_source = config_data.get(Configuration.MARKET_DATA_SOURCE, "Not Defined")
 
         if data_source == cls.SOURCE_LOCAL:
-            return LocalDataReader(config[Configuration.MARKET_DATA_FILE_PATH])
+            return LocalDataReader(config_data[Configuration.MARKET_DATA_FILE_PATH])
         elif data_source == cls.SOURCE_SQL:
             return SqlDataReader()
         else:
-            logger.error(f"Data source '{data_source}' is not recognised - valid sources are "
-                         f"{', '.join(cls.get_valid_sources())}")
+            err_msg = f"Data source '{data_source}' is not recognised - valid sources " \
+                f"are {', '.join(cls.get_valid_sources())}"
+            logger.error(err_msg)
+            raise ValueError(err_msg)

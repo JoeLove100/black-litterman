@@ -3,9 +3,14 @@ from typing import List
 
 class Configuration:
 
+    MARKET_DATA = "market_data"
     MARKET_DATA_SOURCE = "source"
     MARKET_DATA_FILE_PATH = "file_path"
+    FIRST_DATE = "first_date"
+    LAST_DATE = "last_date"
+    ASSET_UNIVERSE = "asset_universe"
 
+    PARAMETERS = "parameters"
     TAU = "tau"
     RISK_AVERSION = "risk_aversion"
 

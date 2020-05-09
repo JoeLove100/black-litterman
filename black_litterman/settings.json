@@ -1,0 +1,23 @@
+{
+  "market_data" :
+  {
+    "source": "local",
+    "file_path": "C:\\Users\\joelo\\Code\\black_litterman_data.xlsx",
+    "first_date": "2017-01-02",
+    "last_date": "2020-03-31",
+    "asset_universe":
+    {
+      "UK equities": "UK equities",
+      "US equities": "US equities",
+      "Europe equities": "Europe equities",
+      "UK bonds": "UK bonds",
+      "US bonds": "US bonds",
+      "Europe bonds": "Europe bonds"
+    }
+  },
+  "parameters":
+  {
+    "tau": 0.05,
+    "risk_aversion": 3
+  }
+}
