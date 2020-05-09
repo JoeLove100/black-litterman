@@ -24,3 +24,9 @@ class MarketData:
     def get_data_types(cls) -> List[str]:
 
         return [cls.PRICE_DATA, cls.MARKET_CAP_DATA]
+
+
+class Weights:
+
+    MARKET = "Market Weights"
+    BLACK_LITTERMAN = "Black-Litterman Weights"

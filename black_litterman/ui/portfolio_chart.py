@@ -1,5 +1,4 @@
-from typing import Dict
-
+from typing import Dict, List
 from PySide2 import QtWidgets
 from PySide2.QtCharts import QtCharts
 
@@ -23,19 +22,26 @@ class PortfolioChart(QtWidgets.QWidget):
         self.setLayout(self._layout)
 
     def draw_chart(self,
-                   weights: Dict[str, float]) -> None:
+                   all_weights: Dict[str, Dict[str, float]],
+                   asset_universe: List[str]) -> None:
 
-        pie_series = QtCharts.QPieSeries()
+        bar_series = QtCharts.QBarSeries()
+        for name, weights in all_weights.items():
 
-        for asset_name, asset_weight in weights.items():
-            pie_series.append(asset_name, asset_weight)
+            bar_set = QtCharts.QBarSet(name)
+            bar_set.append(weights.values())
+            bar_series.append(bar_set)
 
         chart = QtCharts.QChart()
-        chart.addSeries(pie_series)
+        chart.addSeries(bar_series)
+
+        axis = QtCharts.QBarCategoryAxis()
+        axis.append(asset_universe)
         chart.createDefaultAxes()
-        chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
-        chart.setTitle("Portfolio Allocation")
+        chart.setAxisX(axis)
+
         chart.legend().setVisible(True)
+
         self._chart_view.setChart(chart)
 
 
@@ -48,7 +54,7 @@ if __name__ == "__main__":
     app.setFont(QtGui.QFont("Arial", 10))
 
     c = PortfolioChart()
-    c.draw_chart({"Government Bonds": 0.4, "World Equity": 0.6})
+    c.draw_chart({"market weights": {"Government Bonds": 0.4, "World Equity": 0.6}})
     c.show()
 
     sys.exit(app.exec_())
