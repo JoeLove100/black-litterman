@@ -1,10 +1,10 @@
 from typing import List
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide2 import QtWidgets, QtCore
 from black_litterman.domain.views import View
 from black_litterman.ui.view_designer_control import ViewDesignerDialog
 
 
-class ViewButton(QtWidgets.QWidget):
+class ViewButton(QtWidgets.QFrame):
 
     delete_clicked = QtCore.Signal(QtWidgets.QWidget)
 
@@ -59,6 +59,10 @@ class ViewButton(QtWidgets.QWidget):
         self.layout.setColumnStretch(1, 1)
         self.layout.setColumnStretch(2, 1)
 
+    def _set_control_style(self):
+
+        self.setFrameStyle(QtWidgets.QFrame.StyledPanel)
+
     def _show_designer(self):
         designer = ViewDesignerDialog(self._view, self._asset_universe)
         result = designer.exec_()
@@ -72,6 +76,7 @@ class ViewButton(QtWidgets.QWidget):
 
     def _clicked_delete(self):
         self.delete_clicked.emit(self)
+
 
 if __name__ == "__main__":
 

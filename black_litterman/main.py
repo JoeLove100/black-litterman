@@ -25,6 +25,8 @@ class BlackLittermanApp(QtWidgets.QWidget):
     def _create_controls(self):
         self._main_chart = PortfolioChart()
         self._view_manager = ViewManager({}, self._engine.get_asset_universe())
+        self._view_manager.setMaximumWidth(300)
+        self._view_manager.setMinimumWidth(300)
 
     def _initialise_controls(self):
         market_weights = self._engine.get_market_weights()
@@ -57,8 +59,9 @@ if __name__ == "__main__":
     import sys
 
     app = QtWidgets.QApplication([])
+    app.setStyle("fusion")
     blw = BlackLittermanApp()
     blw.setWindowTitle("Black Litterman Portfolio Tool")
-    blw.resize(750, 500)
+    blw.resize(900, 500)
     blw.show()
     sys.exit(app.exec_())

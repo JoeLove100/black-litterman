@@ -1,9 +1,10 @@
 from typing import List, Dict
 from PySide2 import QtWidgets, QtCore
 from black_litterman.ui.view_button import View, ViewButton
+from black_litterman.ui.fonts import FontHelper
 
 
-class ViewManager(QtWidgets.QWidget):
+class ViewManager(QtWidgets.QFrame):
 
     def __init__(self, all_views: Dict[str, View], asset_universe: List[str]) -> None:
 
@@ -14,6 +15,7 @@ class ViewManager(QtWidgets.QWidget):
         self._add_event_handlers()
         self._add_controls_to_layout()
         self._size_layout()
+        self._set_control_style()
 
     def _create_controls(self):
 
@@ -26,6 +28,10 @@ class ViewManager(QtWidgets.QWidget):
         self._add_view_button = QtWidgets.QPushButton("Add new view")
         self._add_view_button.setMinimumHeight(30)
 
+        self._title_label = QtWidgets.QLabel()
+        self._title_label.setText("Add market views (max 4)")
+        self._title_label.setFont(FontHelper.get_title_font())
+
     def _add_event_handlers(self):
 
         self._add_view_button.clicked.connect(self._add_new_view_button)
@@ -35,13 +41,20 @@ class ViewManager(QtWidgets.QWidget):
         self.layout = QtWidgets.QGridLayout()
         self.setLayout(self.layout)
 
-        self.layout.addWidget(self._views_panel, 0, 0)
-        self.layout.addWidget(self._add_view_button, 1, 0)
+        self.layout.addWidget(self._title_label, 0, 0)
+        self.layout.addWidget(self._views_panel, 1, 0)
+        self.layout.addWidget(self._add_view_button, 2, 0)
 
     def _size_layout(self):
 
-        self.layout.setRowStretch(0, 9)
-        self.layout.setRowStretch(1, 1)
+        self.layout.setRowStretch(0, 1)
+        self.layout.setRowStretch(1, 9)
+        self.layout.setRowStretch(2, 1)
+
+    def _set_control_style(self):
+
+        self.setFrameStyle(QtWidgets.QFrame.StyledPanel | QtWidgets.QFrame.Raised)
+        self.setLineWidth(3)
 
     def _add_new_view_button(self):
 
