@@ -3,6 +3,7 @@ import json
 from PySide2 import QtWidgets
 from black_litterman.ui.view_manager import ViewManager
 from black_litterman.ui.portfolio_chart import PortfolioChart
+from black_litterman.ui.chart_settings_control import ChartSettingsControl
 from black_litterman.domain.config_handling import ConfigHandler
 from black_litterman.ui.fonts import FontHelper
 
@@ -27,6 +28,7 @@ class BlackLittermanApp(QtWidgets.QWidget):
     def _create_controls(self):
         self._main_chart = PortfolioChart()
         self._view_manager = ViewManager({}, self._engine.get_asset_universe())
+        self._chart_settings_control = ChartSettingsControl(*self._engine.get_dates())
         self._view_manager.setMaximumWidth(300)
         self._view_manager.setMinimumWidth(300)
 
@@ -47,6 +49,7 @@ class BlackLittermanApp(QtWidgets.QWidget):
         layout.addWidget(title_label, 0, 0, 1, 1)
         layout.addWidget(self._main_chart, 1, 0, 1, 1)
         layout.addWidget(self._view_manager, 1, 1, 1, 1)
+        layout.addWidget(self._chart_settings_control, 2, 0, 2, 1)
 
         self.layout = layout
         self.setLayout(self.layout)
@@ -83,6 +86,6 @@ if __name__ == "__main__":
     app.setStyle("fusion")
     blw = BlackLittermanApp()
     blw.setWindowTitle("Black Litterman")
-    blw.resize(900, 500)
+    blw.resize(1000, 500)
     blw.show()
     sys.exit(app.exec_())

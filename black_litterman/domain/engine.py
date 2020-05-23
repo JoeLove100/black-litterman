@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
+from datetime import datetime
 from scipy import optimize
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from dataclasses import dataclass
 from black_litterman.market_data.data_readers import BaseDataReader
 from black_litterman.domain.views import ViewCollection, View
@@ -55,6 +56,13 @@ class BLEngine:
         """
 
         return list(self._calc_settings.asset_universe.keys())
+
+    def get_dates(self) -> Tuple[str, str]:
+        """
+        get the start and end date from the calc settings
+        """
+
+        return self._calc_settings.start_date, self._calc_settings.calculation_date
 
     def get_black_litterman_weights(self,
                                     view_collection: ViewCollection) -> pd.Series:
