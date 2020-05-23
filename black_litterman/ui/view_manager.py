@@ -71,6 +71,7 @@ class ViewManager(QtWidgets.QFrame):
     def _delete_button(self,
                        button):
         button.setParent(None)
+        self.view_changed.emit()
 
     def _raise_view_changed(self):
         self.view_changed.emit()

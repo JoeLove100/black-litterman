@@ -56,9 +56,11 @@ class BlackLittermanApp(QtWidgets.QWidget):
         asset_universe = self._engine.get_asset_universe()
         market_weights = self._engine.get_market_weights()
         all_views = self._view_manager.get_all_views()
-        black_litterman_weights = self._engine.get_black_litterman_weights(all_views)
-
-        self._main_chart.draw_chart(asset_universe, market_weights, black_litterman_weights)
+        if all_views.is_empty():
+            self._main_chart.draw_chart(asset_universe, market_weights)
+        else:
+            black_litterman_weights = self._engine.get_black_litterman_weights(all_views)
+            self._main_chart.draw_chart(asset_universe, market_weights, black_litterman_weights)
 
     @staticmethod
     def _read_config():
