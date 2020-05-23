@@ -1,10 +1,13 @@
 from typing import List, Dict
 from PySide2 import QtWidgets, QtCore
-from black_litterman.ui.view_button import View, ViewButton
+from black_litterman.ui.view_button import ViewButton
 from black_litterman.ui.fonts import FontHelper
+from black_litterman.domain.views import ViewCollection, View
 
 
 class ViewManager(QtWidgets.QFrame):
+
+    view_changed = QtCore.Signal()
 
     def __init__(self, all_views: Dict[str, View], asset_universe: List[str]) -> None:
 
@@ -63,10 +66,25 @@ class ViewManager(QtWidgets.QFrame):
         button.setFixedHeight(75)
         self._views_panel.layout().addWidget(button)
         button.delete_clicked.connect(self._delete_button)
+        button.view_changed.connect(self._raise_view_changed)
 
     def _delete_button(self,
                        button):
         button.setParent(None)
+
+    def _raise_view_changed(self):
+        self.view_changed.emit()
+
+    def get_all_views(self) -> ViewCollection:
+
+        all_views = ViewCollection()
+
+        for child_control in self._views_panel.children():
+            if isinstance(child_control, ViewButton):
+                view = child_control.get_view()
+                all_views.add_view(view)
+
+        return all_views
 
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ class BlackLittermanApp(QtWidgets.QWidget):
         self._set_engine_from_config()
         self._create_controls()
         self._initialise_controls()
+        self._add_event_handlers()
         self._add_controls_to_layout()
         self._size_layout()
 
@@ -33,6 +34,10 @@ class BlackLittermanApp(QtWidgets.QWidget):
         asset_universe = self._engine.get_asset_universe()
         self._main_chart.draw_chart(asset_universe, market_weights)
 
+    def _add_event_handlers(self):
+
+        self._view_manager.view_changed.connect(self._plot_chart)
+
     def _add_controls_to_layout(self):
         layout = QtWidgets.QGridLayout()
 
@@ -45,6 +50,15 @@ class BlackLittermanApp(QtWidgets.QWidget):
     def _size_layout(self):
         self.layout.setColumnStretch(0, 9)
         self.layout.setColumnStretch(0, 1)
+
+    def _plot_chart(self):
+
+        asset_universe = self._engine.get_asset_universe()
+        market_weights = self._engine.get_market_weights()
+        all_views = self._view_manager.get_all_views()
+        black_litterman_weights = self._engine.get_black_litterman_weights(all_views)
+
+        self._main_chart.draw_chart(asset_universe, market_weights, black_litterman_weights)
 
     @staticmethod
     def _read_config():

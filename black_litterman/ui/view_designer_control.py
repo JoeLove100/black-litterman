@@ -1,50 +1,7 @@
-from dataclasses import dataclass
-from typing import Dict, List, Optional
-from PySide2 import QtWidgets, QtCore, QtGui
+from typing import List
+from PySide2 import QtWidgets, QtCore
 from black_litterman.ui.allocation_controls import AllocationControlRelative, AllocationControlAbsolute
-
-
-class ViewAllocation:
-
-    def __init__(self,
-                 long_asset: str,
-                 short_asset: Optional[str] = None):
-
-        self.long_asset = long_asset
-        self.short_asset = short_asset
-
-    ABSOLUTE = "Absolute"
-    RELATIVE = "Relative"
-
-    @classmethod
-    def get_all_view_types(cls):
-        return [cls.ABSOLUTE, cls.RELATIVE]
-
-    @property
-    def view_type(self):
-        if self.short_asset:
-            return self.RELATIVE
-        else:
-            return self.ABSOLUTE
-
-    def __eq__(self,
-               other) -> bool:
-
-        if self.long_asset != other.long_asset:
-            return False
-        if self.short_asset != other.short_asset:
-            return False
-        return True
-
-
-@dataclass(frozen=False)
-class View:
-
-    id: int
-    name: str
-    out_performance: float
-    confidence: int
-    allocation: ViewAllocation
+from black_litterman.domain.views import View, ViewAllocation
 
 
 class ViewDesignerDialog(QtWidgets.QDialog):
@@ -198,20 +155,3 @@ class ViewDesignerDialog(QtWidgets.QDialog):
     def get_view(self):
         return self._view
 
-
-if __name__ == "__main__":
-
-    import sys
-
-    app = QtWidgets.QApplication([])
-    app.setFont(QtGui.QFont("Arial", 10))
-    app.setStyle(QtWidgets.QStyleFactory.create("Fusion"))
-
-    v = View(1, "Bonds outperform equity", 0.5, 2, ViewAllocation("test_1"))
-    au = ["asset_1", "asset_2", "asset_3", "asset_4"]
-    widget = ViewDesignerDialog(v, au)
-    widget.setWindowTitle("Add new view")
-    widget.resize(350, 200)
-    widget.show()
-
-    sys.exit(app.exec_())

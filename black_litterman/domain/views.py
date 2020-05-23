@@ -35,7 +35,7 @@ class View:
     id: str
     name: str
     out_performance: float
-    confidence: float
+    confidence: int
     allocation: ViewAllocation
 
     @ staticmethod
@@ -93,7 +93,7 @@ class ViewCollection:
             return pd.DataFrame()
         else:
             view_matrix = pd.concat(all_view_data_frames, axis=1)
-            return view_matrix.T
+            return view_matrix
 
     def get_view_out_performances(self) -> pd.Series:
 
