@@ -19,6 +19,7 @@ class ViewManager(QtWidgets.QFrame):
         self._add_controls_to_layout()
         self._size_layout()
         self._set_control_style()
+        self._view_count = 0
 
     def _create_controls(self):
 
@@ -59,19 +60,30 @@ class ViewManager(QtWidgets.QFrame):
         self.setFrameStyle(QtWidgets.QFrame.StyledPanel | QtWidgets.QFrame.Raised)
         self.setLineWidth(3)
 
-    def _add_new_view_button(self):
+    def _add_new_view_button(self) -> None:
 
-        new_view = View.get_new_view_with_defaults(self._asset_universe[0])
-        button = ViewButton(view=new_view, asset_universe=self._asset_universe)
-        button.setFixedHeight(75)
-        self._views_panel.layout().addWidget(button)
-        button.delete_clicked.connect(self._delete_button)
-        button.view_changed.connect(self._raise_view_changed)
+        if self._view_count == 4:
+            error_msg = QtWidgets.QMessageBox()
+            error_msg.setIcon(QtWidgets.QMessageBox.Critical)
+            error_msg.setText("Error")
+            error_msg.setInformativeText('Max views reached')
+            error_msg.setWindowTitle("Error")
+            error_msg.exec_()
+        else:
+            new_view = View.get_new_view_with_defaults(self._asset_universe[0])
+            button = ViewButton(view=new_view, asset_universe=self._asset_universe)
+            button.setFixedHeight(75)
+            self._views_panel.layout().addWidget(button)
+            button.delete_clicked.connect(self._delete_button)
+            button.view_changed.connect(self._raise_view_changed)
+            self._view_count += 1
+            self.view_changed.emit()
 
     def _delete_button(self,
                        button):
         button.setParent(None)
         self.view_changed.emit()
+        self._view_count -= 1
 
     def _raise_view_changed(self):
         self.view_changed.emit()
@@ -86,20 +98,3 @@ class ViewManager(QtWidgets.QFrame):
                 all_views.add_view(view)
 
         return all_views
-
-
-if __name__ == "__main__":
-
-    import sys
-    from PySide2 import QtGui
-    from black_litterman.domain.views import ViewAllocation
-
-    app = QtWidgets.QApplication([])
-    app.setFont(QtGui.QFont("Arial", 10))
-
-    v = ViewManager({}, ["asset_1", "asset_2", "asset_3", "asset_4"])
-    v.resize(200, 40)
-    v.show()
-
-    sys.exit(app.exec_())
-
