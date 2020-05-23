@@ -4,6 +4,7 @@ from PySide2 import QtWidgets
 from black_litterman.ui.view_manager import ViewManager
 from black_litterman.ui.portfolio_chart import PortfolioChart
 from black_litterman.domain.config_handling import ConfigHandler
+from black_litterman.ui.fonts import FontHelper
 
 
 class BlackLittermanApp(QtWidgets.QWidget):
@@ -40,16 +41,20 @@ class BlackLittermanApp(QtWidgets.QWidget):
 
     def _add_controls_to_layout(self):
         layout = QtWidgets.QGridLayout()
+        title_label = QtWidgets.QLabel("Black Litterman Asset Allocation Tool")
+        title_label.setFont(FontHelper.get_title_font())
 
-        layout.addWidget(self._main_chart, 0, 0, 1, 1)
-        layout.addWidget(self._view_manager, 0, 1, 1, 1)
+        layout.addWidget(title_label, 0, 0, 1, 1)
+        layout.addWidget(self._main_chart, 1, 0, 1, 1)
+        layout.addWidget(self._view_manager, 1, 1, 1, 1)
 
         self.layout = layout
         self.setLayout(self.layout)
 
     def _size_layout(self):
-        self.layout.setColumnStretch(0, 9)
         self.layout.setColumnStretch(0, 1)
+        self.layout.setColumnStretch(1, 9)
+        self.layout.setColumnStretch(1, 1)
 
     def _plot_chart(self):
 
@@ -77,7 +82,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setStyle("fusion")
     blw = BlackLittermanApp()
-    blw.setWindowTitle("Black Litterman Portfolio Tool")
+    blw.setWindowTitle("Black Litterman")
     blw.resize(900, 500)
     blw.show()
     sys.exit(app.exec_())
