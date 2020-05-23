@@ -1,5 +1,4 @@
 import pandas as pd
-import math
 
 
 class MarketDataEngine:
@@ -21,7 +20,7 @@ class MarketDataEngine:
 
         date_mask = (self._returns_data.index >= start_date) & (self._returns_data.index <= end_date)
         returns_for_dates = self._returns_data[date_mask]
-        covariance_for_dates = returns_for_dates.cov() * math.sqrt(250)
+        covariance_for_dates = returns_for_dates.cov() * 250
         return covariance_for_dates
 
     def get_market_weights(self,
@@ -35,3 +34,17 @@ class MarketDataEngine:
         market_weights = market_cap_for_date / market_cap_for_date.sum()
         return market_weights
 
+    def get_implied_returns(self,
+                            start_date: str,
+                            end_date: str,
+                            risk_aversion: float) -> pd.Series:
+        """
+        get the market clearing returns for the given
+        level of risk aversion
+        """
+
+        cov_matrix = self.get_annualised_cov_matrix(start_date, end_date)
+        market_weights = self.get_market_weights(end_date)
+        market_returns = cov_matrix.dot(market_weights).mul(risk_aversion)
+
+        return market_returns

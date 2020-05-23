@@ -1,8 +1,9 @@
 import math
 import pandas as pd
-from typing import List
+from typing import List, Optional
 from PySide2 import QtWidgets, QtCore, QtGui
 from PySide2.QtCharts import QtCharts
+from black_litterman.ui.chart_settings_control import ChartTypes
 
 
 class PortfolioChart(QtWidgets.QWidget):
@@ -15,19 +16,40 @@ class PortfolioChart(QtWidgets.QWidget):
 
     def _create_controls(self) -> None:
 
-        self._chart_view = QtCharts.QChartView()
+        self._weights_chart_view = QtCharts.QChartView()
+        self._returns_chart_view = QtCharts.QChartView()
 
     def _add_controls_to_layout(self) -> None:
 
+        self._chart_stack = QtWidgets.QStackedLayout()
+        self._chart_stack.addWidget(self._weights_chart_view)
+        self._chart_stack.addWidget(self._returns_chart_view)
+
         self._layout = QtWidgets.QGridLayout()
-        self._layout.addWidget(self._chart_view)
+        self._layout.addLayout(self._chart_stack, 0, 0)
         self.setLayout(self._layout)
 
-    def draw_chart(self,
-                   asset_universe: List[str],
-                   *args: pd.Series) -> None:
+    def select_chart(self,
+                     selected_chart_type: str) -> None:
 
-        asset_universe = [s.replace(" ", "<br>") for s in asset_universe]  # no word wrap for some reason
+        selected_index = self._get_index_for_chart_type(selected_chart_type)
+        self._chart_stack.setCurrentIndex(selected_index)
+
+    def draw_charts(self,
+                    asset_universe: List[str],
+                    implied_returns: pd.Series,
+                    selected_chart_type: Optional[str] = ChartTypes.WEIGHTS,
+                    *args: pd.Series) -> None:
+
+        asset_universe = [s.replace(" ", "<br>") for s in asset_universe]  # no word wrap so add line break
+        self._set_weights_chart(asset_universe, *args)
+        self._set_returns_chart(asset_universe, implied_returns)
+        self.select_chart(selected_chart_type)
+
+    def _set_weights_chart(self,
+                           asset_universe: List[str],
+                           *args: pd.Series) -> None:
+
         bar_series = QtCharts.QBarSeries()
         y_min = 0
         y_max = 0
@@ -67,7 +89,39 @@ class PortfolioChart(QtWidgets.QWidget):
         chart.legend().setVisible(True)
         chart.legend().setAlignment(QtCore.Qt.AlignBottom)
 
-        self._chart_view.setChart(chart)
+        self._weights_chart_view.setChart(chart)
+
+    def _set_returns_chart(self,
+                           asset_universe: List[str],
+                           implied_returns: pd.Series) -> None:
+
+        bar_series = QtCharts.QBarSeries()
+        y_min = implied_returns.min() * 100
+        y_max = implied_returns.max() * 100
+
+        # configure basic chart
+        chart = QtCharts.QChart()
+        chart.setTitle("Market Implied Expected Returns")
+        title_font = QtGui.QFont()
+        title_font.setBold(True)
+        chart.setFont(title_font)
+        chart.addSeries(bar_series)
+
+        # configure the x axis
+        axis_x = QtCharts.QBarCategoryAxis()
+        axis_x.append(asset_universe)
+        chart.createDefaultAxes()
+        chart.setAxisX(axis_x)
+
+        # configure the y axis
+        axis_y = QtCharts.QValueAxis()
+        self._set_y_axis_limits(y_max, y_min, axis_y)
+        axis_y.setLabelFormat("%.0f")
+        axis_y.setTitleText("Expected Return (%pa)")
+        chart.setAxisY(axis_y)
+        bar_series.attachAxis(axis_y)
+
+        self._returns_chart_view.setChart(chart)
 
     def _set_y_axis_limits(self,
                            y_max: float,
@@ -94,3 +148,16 @@ class PortfolioChart(QtWidgets.QWidget):
         else:
             return rounded_lim
 
+    @staticmethod
+    def _get_index_for_chart_type(chart_type: str):
+        """
+        convert the chart type to the index
+        of the stacked chart
+        """
+
+        if chart_type == ChartTypes.WEIGHTS:
+            return 0
+        elif chart_type == ChartTypes.RETURNS:
+            return 1
+        else:
+            raise ValueError(f"Unrecognised chart type {chart_type}")

@@ -145,7 +145,7 @@ class ViewDesignerDialog(QtWidgets.QDialog):
 
         view_id = self._view.id
         name = self._name_box.text()
-        out_performance = self._outperf_up_down.value()
+        out_performance = self._outperf_up_down.value() / 100
         confidence = self._confidence_slider.value()
         allocation = self._allocation_control.get_allocation()
 

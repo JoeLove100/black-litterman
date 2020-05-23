@@ -33,13 +33,13 @@ class BlackLittermanApp(QtWidgets.QWidget):
         self._view_manager.setMinimumWidth(300)
 
     def _initialise_controls(self):
-        market_weights = self._engine.get_market_weights()
-        asset_universe = self._engine.get_asset_universe()
-        self._main_chart.draw_chart(asset_universe, market_weights)
+        self._plot_chart()
 
     def _add_event_handlers(self):
 
         self._view_manager.view_changed.connect(self._plot_chart)
+        self._chart_settings_control.dates_changed.connect(self._plot_chart)
+        self._chart_settings_control.chart_type_changed.connect(self._change_chart_type)
 
     def _add_controls_to_layout(self):
         layout = QtWidgets.QGridLayout()
@@ -61,14 +61,22 @@ class BlackLittermanApp(QtWidgets.QWidget):
 
     def _plot_chart(self):
 
+        start_date, end_date, chart_type = self._chart_settings_control.get_settings()
         asset_universe = self._engine.get_asset_universe()
-        market_weights = self._engine.get_market_weights()
+        market_weights = self._engine.get_market_weights(end_date)
+        implied_returns = self._engine.get_market_returns(start_date, end_date)
         all_views = self._view_manager.get_all_views()
         if all_views.is_empty():
-            self._main_chart.draw_chart(asset_universe, market_weights)
+            self._main_chart.draw_charts(asset_universe, implied_returns, chart_type,
+                                         market_weights)
         else:
-            black_litterman_weights = self._engine.get_black_litterman_weights(all_views)
-            self._main_chart.draw_chart(asset_universe, market_weights, black_litterman_weights)
+            black_litterman_weights = self._engine.get_black_litterman_weights(all_views, start_date, end_date)
+            self._main_chart.draw_charts(asset_universe, implied_returns, chart_type,
+                                         market_weights, black_litterman_weights)
+
+    def _change_chart_type(self):
+        _, _, chart_type = self._chart_settings_control.get_settings()
+        self._main_chart.select_chart(chart_type)
 
     @staticmethod
     def _read_config():

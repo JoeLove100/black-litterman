@@ -1,15 +1,14 @@
 import numpy as np
 import pandas as pd
-from datetime import datetime
 from scipy import optimize
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
 from black_litterman.market_data.data_readers import BaseDataReader
 from black_litterman.domain.views import ViewCollection, View
 from black_litterman.constants import Configuration, Weights
 
 
-@dataclass(frozen=False)
+@dataclass(frozen=True)
 class CalculationSettings:
     tau: float
     risk_aversion: float
@@ -40,14 +39,27 @@ class BLEngine:
         self._market_data_engine = data_reader.get_market_data_engine()
         self._calc_settings = calc_settings
 
-    def get_market_weights(self) -> pd.Series:
+    def get_market_weights(self,
+                           end_date: Optional[str] = None) -> pd.Series:
         """
         return the implied market clearing weights
         """
 
-        weights = self._market_data_engine.get_market_weights(self._calc_settings.calculation_date)
+        if end_date is None:
+            end_date = self._calc_settings.calculation_date
+
+        weights = self._market_data_engine.get_market_weights(end_date)
         weights.name = Weights.MARKET
         return weights
+
+    def get_market_returns(self,
+                           start_date: str,
+                           end_date: str) -> pd.Series:
+        """
+        return the implied market clearing expected returns
+        """
+
+        return self._market_data_engine.get_implied_returns(start_date, end_date, self._calc_settings.risk_aversion)
 
     def get_asset_universe(self) -> List[str]:
         """
@@ -65,16 +77,17 @@ class BLEngine:
         return self._calc_settings.start_date, self._calc_settings.calculation_date
 
     def get_black_litterman_weights(self,
-                                    view_collection: ViewCollection) -> pd.Series:
+                                    view_collection: ViewCollection,
+                                    start_date: str,
+                                    end_date: str) -> pd.Series:
         """
         derive target portfolio weights based on the Black-Litterman
         portfolio optimisation model
         """
 
         # get the market data
-        market_weights = self._market_data_engine.get_market_weights(self._calc_settings.start_date)
-        market_cov = self._market_data_engine.get_annualised_cov_matrix(self._calc_settings.start_date,
-                                                                        self._calc_settings.calculation_date)
+        market_weights = self._market_data_engine.get_market_weights(start_date)
+        market_cov = self._market_data_engine.get_annualised_cov_matrix(start_date, end_date)
 
         # get the view specific data
         view_mat = view_collection.get_view_matrix(list(self._calc_settings.asset_universe))

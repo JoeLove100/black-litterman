@@ -17,7 +17,8 @@ class ChartTypes:
 
 class ChartSettingsControl(QtWidgets.QWidget):
 
-    settings_changed = QtCore.Signal()
+    dates_changed = QtCore.Signal()
+    chart_type_changed = QtCore.Signal()
 
     def __init__(self,
                  start_date: str,
@@ -62,8 +63,9 @@ class ChartSettingsControl(QtWidgets.QWidget):
 
     def _add_event_handlers(self):
 
-        self._start_date_edit.dateChanged.connect(self._start_date_updated)
-        self._end_date_edit.dateChanged.connect(self._end_date_updated)
+        self._start_date_edit.editingFinished.connect(self._start_date_updated)
+        self._end_date_edit.editingFinished.connect(self._end_date_updated)
+        self._chart_type_combo.currentTextChanged.connect(self._chart_type_changed)
 
     def _add_controls_to_layout(self):
 
@@ -105,22 +107,22 @@ class ChartSettingsControl(QtWidgets.QWidget):
         new_start_date = self._start_date_edit.date().toPython()
         new_max_end_date = new_start_date - pd.offsets.MonthEnd(3)
         self._end_date_edit.setMaximumDate(QtCore.QDate.fromString(new_max_end_date.strftime("%Y-%m-%d")))
-        self.settings_changed.emit()
+        self.dates_changed.emit()
 
     def _end_date_updated(self):
 
         new_end_date = self._end_date_edit.date().toPython()
         new_min_start_date = new_end_date + pd.offsets.MonthEnd(3)
         self._start_date_edit.setMinimumDate(QtCore.QDate.fromString(new_min_start_date.strftime("%Y-%m-%d")))
-        self.settings_changed.emit()
+        self.dates_changed.emit()
 
     def _chart_type_changed(self):
-        self.settings_changed.emit()
+        self.chart_type_changed.emit()
 
-    def get_settings(self) -> Tuple[datetime, datetime, str]:
+    def get_settings(self) -> Tuple[str, str, str]:
 
-        start_date = self._start_date_edit.date().toPython()  # type: datetime
-        end_date = self._end_date_edit.date().toPython()  # type: datetime
+        start_date = self._start_date_edit.date().toString("yyyy-MM-dd")
+        end_date = self._end_date_edit.date().toString("yyyy-MM-dd")
         chart_type = self._chart_type_combo.currentText()
 
         return start_date, end_date, chart_type
