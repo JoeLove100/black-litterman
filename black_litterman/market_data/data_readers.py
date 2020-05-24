@@ -118,11 +118,13 @@ class ReutersDataReader(BaseDataReader):
                        end_date: str) -> Dict[str, pd.DataFrame]:
 
         n = len(self._tickers)
-        price_requests = list(zip(self._tickers.values(), ["PI"] * n, [start_date] * n, [end_date] * n))
+        tickers = [v[0] for v in self._tickers.values()]
+
+        price_requests = list(zip(tickers, ["PI"] * n, [start_date] * n, [end_date] * n))
         price_requests = pd.DataFrame(price_requests, columns=self._mdc.get_reuters_input_headers())
         self._mdc.add_reuters_data(price_requests)
 
-        market_cap_requests = list(zip(self._tickers.values(), ["X(MV)~GBP"] * n, [start_date] * n, [end_date] * n))
+        market_cap_requests = list(zip(tickers, ["X(MV)~GBP"] * n, [start_date] * n, [end_date] * n))
         market_cap_requests = pd.DataFrame(market_cap_requests, columns=self._mdc.get_reuters_input_headers())
         self._mdc.add_reuters_data(market_cap_requests)
 
@@ -142,6 +144,9 @@ class ReutersDataReader(BaseDataReader):
             formatted_data = pd.pivot_table(data, columns="ticker", index="date", values="value")
             formatted_data.index = pd.to_datetime(formatted_data.index)
             all_formatted_data.update({data_type: formatted_data})
+
+        cap_scalings = {value[0]: value[1] for value in self._tickers.values()}
+        all_formatted_data[MarketData.MARKET_CAP_DATA] *= cap_scalings
 
         return all_formatted_data
 

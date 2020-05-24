@@ -7,11 +7,11 @@
     "last_date": "2020-03-31",
     "asset_universe":
     {
-      "UK equities": "FTSE100",
-      "US equities": "S&PCOMP",
-      "Europe equities": "DJES50I",
-      "UK bonds": "IB£GLAL",
-      "US bonds": "IBTRYAL"
+      "UK equities": ["FTSE100", 1000],
+      "US equities": ["S&PCOMP", 1000],
+      "Europe equities": ["DJES50I", 1000],
+      "UK bonds": ["AUKGVAL", 1],
+      "US bonds": ["AUSGVAL", 1]
     }
   },
   "parameters":
