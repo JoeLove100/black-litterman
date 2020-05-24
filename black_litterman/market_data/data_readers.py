@@ -139,13 +139,16 @@ class ReutersDataReader(BaseDataReader):
 
     def _get_formatted_data(self, raw_data: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
 
+        rename = {v[0]: k for k, v in self._tickers.items()}
+        cap_scalings = {ticker: value[1] for ticker, value in self._tickers.items()}
+
         all_formatted_data = {}
         for data_type, data in raw_data.items():
             formatted_data = pd.pivot_table(data, columns="ticker", index="date", values="value")
             formatted_data.index = pd.to_datetime(formatted_data.index)
+            formatted_data.rename(columns=rename, inplace=True)
             all_formatted_data.update({data_type: formatted_data})
 
-        cap_scalings = {value[0]: value[1] for value in self._tickers.values()}
         all_formatted_data[MarketData.MARKET_CAP_DATA] *= cap_scalings
 
         return all_formatted_data
