@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
 from scipy import optimize
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
 from black_litterman.market_data.data_readers import BaseDataReader
 from black_litterman.domain.views import ViewCollection, View
 from black_litterman.constants import Configuration, Weights
 
 
-@dataclass(frozen=False)
+@dataclass(frozen=True)
 class CalculationSettings:
     tau: float
     risk_aversion: float
@@ -34,25 +34,33 @@ class BLEngine:
 
     def __init__(self,
                  data_reader: BaseDataReader,
-                 calc_settings: CalculationSettings,
-                 view_collection: Optional[ViewCollection] = None):
+                 calc_settings: CalculationSettings):
 
         self._market_data_engine = data_reader.get_market_data_engine(calc_settings.start_date,
                                                                       calc_settings.calculation_date)
         self._calc_settings = calc_settings
-        if view_collection is None:
-            self._view_collection = ViewCollection()
-        else:
-            self._view_collection = view_collection
 
-    def get_market_weights(self) -> pd.Series:
+    def get_market_weights(self,
+                           end_date: Optional[str] = None) -> pd.Series:
         """
         return the implied market clearing weights
         """
 
-        weights = self._market_data_engine.get_market_weights(self._calc_settings.calculation_date)
+        if end_date is None:
+            end_date = self._calc_settings.calculation_date
+
+        weights = self._market_data_engine.get_market_weights(end_date)
         weights.name = Weights.MARKET
         return weights
+
+    def get_market_returns(self,
+                           start_date: str,
+                           end_date: str) -> pd.Series:
+        """
+        return the implied market clearing expected returns
+        """
+
+        return self._market_data_engine.get_implied_returns(start_date, end_date, self._calc_settings.risk_aversion)
 
     def get_asset_universe(self) -> List[str]:
         """
@@ -62,21 +70,30 @@ class BLEngine:
 
         return list(self._calc_settings.asset_universe.keys())
 
-    def get_black_litterman_weights(self) -> pd.Series:
+    def get_dates(self) -> Tuple[str, str]:
+        """
+        get the start and end date from the calc settings
+        """
+
+        return self._calc_settings.start_date, self._calc_settings.calculation_date
+
+    def get_black_litterman_weights(self,
+                                    view_collection: ViewCollection,
+                                    start_date: str,
+                                    end_date: str) -> pd.Series:
         """
         derive target portfolio weights based on the Black-Litterman
         portfolio optimisation model
         """
 
         # get the market data
-        market_weights = self._market_data_engine.get_market_weights(self._calc_settings.start_date)
-        market_cov = self._market_data_engine.get_annualised_cov_matrix(self._calc_settings.start_date,
-                                                                        self._calc_settings.calculation_date)
+        market_weights = self._market_data_engine.get_market_weights(start_date)
+        market_cov = self._market_data_engine.get_annualised_cov_matrix(start_date, end_date)
 
         # get the view specific data
-        view_mat = self.get_view_covariances_from_confidences(market_weights, market_cov)
-        view_out_performance = self._view_collection.get_view_out_performances()
-        view_cov = self.get_view_covariances_from_confidences(market_weights, market_cov)
+        view_mat = view_collection.get_view_matrix(list(self._calc_settings.asset_universe))
+        view_out_performance = view_collection.get_view_out_performances()
+        view_cov = self.get_view_covariances_from_confidences(market_weights, market_cov, view_collection)
 
         # calc BL weights
         bl_weights = self._get_weights(market_weights, market_cov, view_mat, view_cov, view_out_performance)
@@ -85,14 +102,15 @@ class BLEngine:
 
     def get_view_covariances_from_confidences(self,
                                               market_weights: pd.Series,
-                                              market_covariance: pd.DataFrame) -> pd.DataFrame:
+                                              market_covariance: pd.DataFrame,
+                                              view_collection: ViewCollection) -> pd.DataFrame:
         """
         build a diagonal covariance matrix from the views
         based on the confidence in each view
         """
 
         cov_by_view = dict()
-        all_views = self._view_collection.get_all_views()
+        all_views = view_collection.get_all_views()
 
         for view in all_views:
             var = self._confidence_to_variance(view, market_weights, market_covariance)
@@ -112,8 +130,11 @@ class BLEngine:
         Black-Litterman calculation to derive target weights
         """
 
-        mat_1 = (view_cov.divide(self._calc_settings.tau) +
-                 view_matrix.dot(market_cov).dot(view_matrix.T))
+        try:
+            mat_1 = (view_cov.divide(self._calc_settings.tau) +
+                     view_matrix.dot(market_cov).dot(view_matrix.T))
+        except ValueError:
+            print("matrix not aligned?")
         mat_1_inv = pd.DataFrame(np.linalg.inv(mat_1.values),
                                  index=mat_1.index, columns=mat_1.index)
         mat_2 = (view_out_performance.divide(self._calc_settings.risk_aversion)
@@ -156,13 +177,13 @@ class BLEngine:
     def _confidence_to_variance(self,
                                 view: View,
                                 market_weights: pd.Series,
-                                market_covariance: pd.DataFrame):
+                                market_covariance: pd.DataFrame,):
         """
         convert a view confidence level to a variance for
         that view
         """
 
-        view_matrix = view.get_view_data_frame(self._calc_settings.asset_universe)
+        view_matrix = view.get_view_data_frame(list(self._calc_settings.asset_universe))
         view_out_performance = pd.Series([view.out_performance], index=[view.id])
         target_weights = self._get_view_target_weights(view, market_weights, market_covariance,
                                                        view_matrix, view_out_performance)

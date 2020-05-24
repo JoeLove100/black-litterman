@@ -35,7 +35,7 @@ class View:
     id: str
     name: str
     out_performance: float
-    confidence: float
+    confidence: int
     allocation: ViewAllocation
 
     @ staticmethod
@@ -92,8 +92,8 @@ class ViewCollection:
         if not all_view_data_frames:
             return pd.DataFrame()
         else:
-            view_matrix = pd.concat(all_view_data_frames, axis=1)
-            return view_matrix.T
+            view_matrix = pd.concat(all_view_data_frames, axis=0)
+            return view_matrix
 
     def get_view_out_performances(self) -> pd.Series:
 
@@ -106,3 +106,5 @@ class ViewCollection:
         cov_matrix = pd.DataFrame(np.diag(uncertainties), index=uncertainties.index, columns=uncertainties.index)
         return cov_matrix
 
+    def is_empty(self):
+        return len(self._all_views) == 0

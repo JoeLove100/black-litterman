@@ -7,6 +7,7 @@ from black_litterman.ui.view_designer_control import ViewDesignerDialog
 class ViewButton(QtWidgets.QFrame):
 
     delete_clicked = QtCore.Signal(QtWidgets.QWidget)
+    view_changed = QtCore.Signal()
 
     def __init__(self,
                  view: View,
@@ -20,6 +21,7 @@ class ViewButton(QtWidgets.QFrame):
         self._add_event_handlers()
         self._add_controls_to_layout()
         self._size_layout()
+        self._set_control_style()
 
     def _create_controls(self):
 
@@ -71,11 +73,16 @@ class ViewButton(QtWidgets.QFrame):
             if self._view != updated_view:
                 self._view = updated_view
                 self._name_label.setText(self._view.name)
+                self.view_changed.emit()
 
         designer.deleteLater()
 
     def _clicked_delete(self):
         self.delete_clicked.emit(self)
+
+    def get_view(self) -> View:
+
+        return self._view
 
 
 if __name__ == "__main__":

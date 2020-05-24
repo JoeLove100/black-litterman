@@ -1,10 +1,13 @@
 from typing import List, Dict
 from PySide2 import QtWidgets, QtCore
-from black_litterman.ui.view_button import View, ViewButton
+from black_litterman.ui.view_button import ViewButton
 from black_litterman.ui.fonts import FontHelper
+from black_litterman.domain.views import ViewCollection, View
 
 
 class ViewManager(QtWidgets.QFrame):
+
+    view_changed = QtCore.Signal()
 
     def __init__(self, all_views: Dict[str, View], asset_universe: List[str]) -> None:
 
@@ -16,6 +19,7 @@ class ViewManager(QtWidgets.QFrame):
         self._add_controls_to_layout()
         self._size_layout()
         self._set_control_style()
+        self._view_count = 0
 
     def _create_controls(self):
 
@@ -56,31 +60,41 @@ class ViewManager(QtWidgets.QFrame):
         self.setFrameStyle(QtWidgets.QFrame.StyledPanel | QtWidgets.QFrame.Raised)
         self.setLineWidth(3)
 
-    def _add_new_view_button(self):
+    def _add_new_view_button(self) -> None:
 
-        new_view = View.get_new_view_with_defaults(self._asset_universe[0])
-        button = ViewButton(view=new_view, asset_universe=self._asset_universe)
-        button.setFixedHeight(75)
-        self._views_panel.layout().addWidget(button)
-        button.delete_clicked.connect(self._delete_button)
+        if self._view_count == 4:
+            error_msg = QtWidgets.QMessageBox()
+            error_msg.setIcon(QtWidgets.QMessageBox.Critical)
+            error_msg.setText("Error")
+            error_msg.setInformativeText('Max views reached')
+            error_msg.setWindowTitle("Error")
+            error_msg.exec_()
+        else:
+            new_view = View.get_new_view_with_defaults(self._asset_universe[0])
+            button = ViewButton(view=new_view, asset_universe=self._asset_universe)
+            button.setFixedHeight(75)
+            self._views_panel.layout().addWidget(button)
+            button.delete_clicked.connect(self._delete_button)
+            button.view_changed.connect(self._raise_view_changed)
+            self._view_count += 1
+            self.view_changed.emit()
 
     def _delete_button(self,
                        button):
         button.setParent(None)
+        self.view_changed.emit()
+        self._view_count -= 1
 
+    def _raise_view_changed(self):
+        self.view_changed.emit()
 
-if __name__ == "__main__":
+    def get_all_views(self) -> ViewCollection:
 
-    import sys
-    from PySide2 import QtGui
-    from black_litterman.domain.views import ViewAllocation
+        all_views = ViewCollection()
 
-    app = QtWidgets.QApplication([])
-    app.setFont(QtGui.QFont("Arial", 10))
+        for child_control in self._views_panel.children():
+            if isinstance(child_control, ViewButton):
+                view = child_control.get_view()
+                all_views.add_view(view)
 
-    v = ViewManager({}, ["asset_1", "asset_2", "asset_3", "asset_4"])
-    v.resize(200, 40)
-    v.show()
-
-    sys.exit(app.exec_())
-
+        return all_views
