@@ -30,7 +30,7 @@ class MarketDataEngine:
         on index market caps
         """
 
-        market_cap_for_date = self._market_cap_data.loc[selected_date, :]
+        market_cap_for_date = self._market_cap_data[self._market_cap_data.index <= selected_date].iloc[-1, :]
         market_weights = market_cap_for_date / market_cap_for_date.sum()
         return market_weights
 
