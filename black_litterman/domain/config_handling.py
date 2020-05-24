@@ -1,5 +1,7 @@
+import os
 import json
 from typing import Any, Dict
+from black_litterman.constants import Configuration
 from black_litterman.domain.engine import BLEngine, CalculationSettings
 from black_litterman.market_data.data_readers import DataReaderFactory
 
@@ -13,10 +15,16 @@ class ConfigHandler:
 
     def _read_config(self) -> Dict[str, Any]:
 
-        with open(self._config_path) as config_file:
-            configuration = json.load(config_file)
+        main_path = os.path.join(self._config_path, "settings.json")
+        credentials_path = os.path.join(self._config_path, "credentials.json")
+        with open(main_path) as config_file:
+            main_configuration = json.load(config_file)
 
-        return configuration
+        with open(credentials_path) as credentials_file:
+            credentials = json.load(credentials_file)
+
+        main_configuration[Configuration.CREDENTIALS] = credentials
+        return main_configuration
 
     def _build_engine(self,
                       config: Dict[str, Any]) -> BLEngine:

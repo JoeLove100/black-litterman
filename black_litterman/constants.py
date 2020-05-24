@@ -9,6 +9,7 @@ class Configuration:
     FIRST_DATE = "first_date"
     LAST_DATE = "last_date"
     ASSET_UNIVERSE = "asset_universe"
+    CREDENTIALS = "credentials"
 
     PARAMETERS = "parameters"
     TAU = "tau"

@@ -18,7 +18,7 @@ class BlackLittermanApp(QtWidgets.QWidget):
 
     def _set_engine_from_config(self) -> None:
 
-        config_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "settings.json")
+        config_path = os.path.abspath(os.path.dirname(__file__))
         config_handler = ConfigHandler(config_path)
         self._engine = config_handler.build_engine_from_config()
 

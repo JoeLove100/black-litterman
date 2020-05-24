@@ -1,18 +1,17 @@
 {
   "market_data" :
   {
-    "source": "local",
+    "source": "reuters",
     "file_path": "C:\\Users\\joelo\\Code\\black_litterman_data.xlsx",
     "first_date": "2017-01-02",
     "last_date": "2020-03-31",
     "asset_universe":
     {
-      "UK equities": "UK equities",
-      "US equities": "US equities",
-      "Europe equities": "Europe equities",
-      "UK bonds": "UK bonds",
-      "US bonds": "US bonds",
-      "Europe bonds": "Europe bonds"
+      "UK equities": "FTSE100",
+      "US equities": "S&PCOMP",
+      "Europe equities": "DJES50I",
+      "UK bonds": "IB£GLAL",
+      "US bonds": "IBTRYAL"
     }
   },
   "parameters":

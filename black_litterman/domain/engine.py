@@ -37,7 +37,8 @@ class BLEngine:
                  calc_settings: CalculationSettings,
                  view_collection: Optional[ViewCollection] = None):
 
-        self._market_data_engine = data_reader.get_market_data_engine()
+        self._market_data_engine = data_reader.get_market_data_engine(calc_settings.start_date,
+                                                                      calc_settings.calculation_date)
         self._calc_settings = calc_settings
         if view_collection is None:
             self._view_collection = ViewCollection()
