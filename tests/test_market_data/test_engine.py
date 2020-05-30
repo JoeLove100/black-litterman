@@ -33,11 +33,11 @@ class TestMarketDataEngine(unittest.TestCase):
         result = engine.get_annualised_cov_matrix(start_date, end_date)
 
         # assert
-        expected_result = {"asset_1": [0.00375866, 0.00318745, 0.00139934],
-                           "asset_2": [0.00318745, 0.01216780, -0.00695777],
-                           "asset_3": [0.00139934, -0.00695777, 0.01485093]}
+        expected_result = {"asset_1": [0.05943, 0.05040, 0.02213],
+                           "asset_2": [0.05040, 0.19239, -0.11001],
+                           "asset_3": [0.02213, -0.11001, 0.23481]}
         expected_result = pd.DataFrame(expected_result, index=["asset_1", "asset_2", "asset_3"])
-        pd.testing.assert_frame_equal(expected_result, result)
+        pd.testing.assert_frame_equal(expected_result, result, check_less_precise=True)
 
     def test_get_covariance_different_end_date(self):
         # arrange
@@ -49,11 +49,11 @@ class TestMarketDataEngine(unittest.TestCase):
         result = engine.get_annualised_cov_matrix(start_date, end_date)
 
         # assert
-        expected_result = {"asset_1": [0.00460482, 0.00807358, 0.00195711],
-                           "asset_2": [0.00807358, 0.02133385, -0.00077281],
-                           "asset_3": [0.00195711, -0.00077281, 0.00329404]}
+        expected_result = {"asset_1": [0.07281, 0.12765, 0.03094],
+                           "asset_2": [0.12765, 0.33732, -0.01222],
+                           "asset_3": [0.03094, -0.01222, 0.05208]}
         expected_result = pd.DataFrame(expected_result, index=["asset_1", "asset_2", "asset_3"])
-        pd.testing.assert_frame_equal(expected_result, result)
+        pd.testing.assert_frame_equal(expected_result, result, check_less_precise=True)
 
     def test_get_covariance_different_start_date(self):
         # arrange
@@ -65,11 +65,11 @@ class TestMarketDataEngine(unittest.TestCase):
         result = engine.get_annualised_cov_matrix(start_date, end_date)
 
         # assert
-        expected_result = pd.DataFrame({"asset_1": [0.00473009, 0.00478256, -0.00227043],
-                                        "asset_2": [0.00478256, 0.01534223, -0.01042061],
-                                        "asset_3": [-0.00227043, -0.01042061, 0.00933641]},
+        expected_result = pd.DataFrame({"asset_1": [0.07479, 0.07562, -0.03590],
+                                        "asset_2": [0.07562, 0.24258, -0.16476],
+                                        "asset_3": [-0.03590, -0.16476, 0.14762]},
                                        index=["asset_1", "asset_2", "asset_3"])
-        pd.testing.assert_frame_equal(expected_result, result)
+        pd.testing.assert_frame_equal(expected_result, result, check_less_precise=True)
 
     def test_get_market_weights(self):
         # arrange
