@@ -35,7 +35,7 @@ class View:
     id: str
     name: str
     out_performance: float
-    confidence: int
+    confidence: float
     allocation: ViewAllocation
 
     @ staticmethod

@@ -60,7 +60,7 @@ class ViewDesignerDialog(QtWidgets.QDialog):
         self._confidence_slider.setMaximum(10)
         self._confidence_slider.setTickInterval(1)
         self._confidence_slider.setFixedHeight(30)
-        self._confidence_slider.setSliderPosition(view.confidence)
+        self._confidence_slider.setSliderPosition(int(view.confidence * 10))
 
         self.slider_label = QtWidgets.QLabel("{:.0%}".format(view.confidence/10))
 
@@ -146,7 +146,7 @@ class ViewDesignerDialog(QtWidgets.QDialog):
         view_id = self._view.id
         name = self._name_box.text()
         out_performance = self._outperf_up_down.value() / 100
-        confidence = self._confidence_slider.value()
+        confidence = self._confidence_slider.value() / 10
         allocation = self._allocation_control.get_allocation()
 
         view = View(view_id, name, out_performance, confidence, allocation)
