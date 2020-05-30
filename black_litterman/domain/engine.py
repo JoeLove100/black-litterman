@@ -87,7 +87,7 @@ class BLEngine:
         """
 
         # get the market data
-        market_weights = self._market_data_engine.get_market_weights(start_date)
+        market_weights = self._market_data_engine.get_market_weights(end_date)
         market_cov = self._market_data_engine.get_annualised_cov_matrix(start_date, end_date)
 
         # get the view specific data
