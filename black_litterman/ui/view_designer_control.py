@@ -64,7 +64,7 @@ class ViewDesignerDialog(QtWidgets.QDialog):
 
         self.slider_label = QtWidgets.QLabel("{:.0%}".format(view.confidence/10))
 
-        self._outperf_up_down.setMinimum(0)
+        self._outperf_up_down.setMinimum(-10)
         self._outperf_up_down.setMaximum(10)
         self._outperf_up_down.setDecimals(1)
         self._outperf_up_down.setSingleStep(0.1)
