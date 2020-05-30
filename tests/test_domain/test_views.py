@@ -1,6 +1,5 @@
 import unittest
 import pandas as pd
-from typing import List
 from black_litterman.domain.views import ViewAllocation, ViewCollection, View
 
 
