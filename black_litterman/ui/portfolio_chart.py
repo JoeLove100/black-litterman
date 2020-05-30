@@ -41,7 +41,7 @@ class PortfolioChart(QtWidgets.QWidget):
                     selected_chart_type: Optional[str] = ChartTypes.WEIGHTS,
                     *args: pd.Series) -> None:
 
-        asset_universe = [s.replace(" ", "<br>") for s in asset_universe]  # no word wrap so add line break
+        # asset_universe = [s.replace(" ", "<br>") for s in asset_universe]  # no word wrap so add line break
         self._set_weights_chart(asset_universe, *args)
         self._set_returns_chart(asset_universe, implied_returns)
         self.select_chart(selected_chart_type)
@@ -56,6 +56,7 @@ class PortfolioChart(QtWidgets.QWidget):
 
         for weights in args:
 
+            weights = weights.reindex(asset_universe)
             y_min = min(weights.min() * 100, y_min)
             y_max = max(weights.max() * 100, y_max)
 
@@ -73,7 +74,7 @@ class PortfolioChart(QtWidgets.QWidget):
 
         # configure the x axis
         axis_x = QtCharts.QBarCategoryAxis()
-        axis_x.append(asset_universe)
+        axis_x.append([s.replace(" ", "<br>") for s in asset_universe])
         chart.createDefaultAxes()
         chart.setAxisX(axis_x)
 
@@ -95,9 +96,11 @@ class PortfolioChart(QtWidgets.QWidget):
                            asset_universe: List[str],
                            implied_returns: pd.Series) -> None:
 
+        implied_returns = implied_returns.reindex(asset_universe)
         bar_series = QtCharts.QBarSeries()
-        y_min = implied_returns.min() * 100
-        y_max = implied_returns.max() * 100
+        bar_set = QtCharts.QBarSet("Returns")
+        bar_set.append(implied_returns.mul(100).values.tolist())
+        bar_series.append(bar_set)
 
         # configure basic chart
         chart = QtCharts.QChart()
@@ -109,13 +112,15 @@ class PortfolioChart(QtWidgets.QWidget):
 
         # configure the x axis
         axis_x = QtCharts.QBarCategoryAxis()
-        axis_x.append(asset_universe)
+        axis_x.append([s.replace(" ", "<br>") for s in asset_universe])
         chart.createDefaultAxes()
         chart.setAxisX(axis_x)
 
         # configure the y axis
+        y_min = implied_returns.min() * 100
+        y_max = implied_returns.max() * 100
         axis_y = QtCharts.QValueAxis()
-        self._set_y_axis_limits(y_max, y_min, axis_y)
+        self._set_y_axis_limits(y_max, y_min, axis_y, 2)
         axis_y.setLabelFormat("%.0f")
         axis_y.setTitleText("Expected Return (%pa)")
         chart.setAxisY(axis_y)
@@ -126,23 +131,25 @@ class PortfolioChart(QtWidgets.QWidget):
     def _set_y_axis_limits(self,
                            y_max: float,
                            y_min: float,
-                           axis_y: QtCharts.QValueAxis) -> None:
+                           axis_y: QtCharts.QValueAxis,
+                           round_to: int = 10) -> None:
 
-        y_max_rounded = self._round_axis_limit(y_max)
-        y_min_rounded = self._round_axis_limit(y_min)
-        intervals = (y_max_rounded - y_min_rounded) // 10 + 1
+        y_max_rounded = self._round_axis_limit(y_max, round_to)
+        y_min_rounded = self._round_axis_limit(y_min, round_to)
+        intervals = (y_max_rounded - y_min_rounded) // round_to + 1
 
         axis_y.setMax(y_max_rounded)
         axis_y.setMin(y_min_rounded)
         axis_y.setTickCount(intervals)
 
     @staticmethod
-    def _round_axis_limit(lim: float):
+    def _round_axis_limit(lim: float,
+                          round_to: int = 10):
 
         if lim == 0:
             return 0
 
-        rounded_lim = (math.floor(abs(lim) / 10) + 1) * 10
+        rounded_lim = (math.floor(abs(lim) / round_to) + 1) * round_to
         if lim < 0:
             return -rounded_lim
         else:
