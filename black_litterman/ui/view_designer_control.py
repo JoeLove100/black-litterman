@@ -103,7 +103,7 @@ class ViewDesignerDialog(QtWidgets.QDialog):
         self.layout.addWidget(QtWidgets.QLabel("View name"), 0, 0)
         self.layout.addWidget(QtWidgets.QLabel("Confidence"), 1, 0)
         self.layout.addWidget(QtWidgets.QLabel("View type"), 3, 0)
-        self.layout.addWidget(QtWidgets.QLabel("Outperformance (pa)"), 2, 0)
+        self.layout.addWidget(QtWidgets.QLabel("Return (%pa)"), 2, 0)
         self.setLayout(self.layout)
 
     def _size_layout(self):
