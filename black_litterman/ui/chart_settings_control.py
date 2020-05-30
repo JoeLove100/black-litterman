@@ -78,12 +78,12 @@ class ChartSettingsControl(QtWidgets.QWidget):
         self._layout.addWidget(self._chart_type_combo, 0, 1)
 
         start_date_label = QtWidgets.QLabel("History start:")
-        start_date_label.setMaximumWidth(60)
+        start_date_label.setMaximumWidth(75)
         self._layout.addWidget(start_date_label, 0, 2)
         self._layout.addWidget(self._start_date_edit, 0, 3)
 
         end_date_label = QtWidgets.QLabel("Calculation Date:")
-        end_date_label.setMaximumWidth(75)
+        end_date_label.setMaximumWidth(105)
         self._layout.addWidget(end_date_label, 0, 4)
         self._layout.addWidget(self._end_date_edit, 0, 5)
 
