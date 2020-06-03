@@ -10,8 +10,11 @@
       "UK equities": ["FTSE100", 1000],
       "US equities": ["S&PCOMP", 1000],
       "Europe equities": ["DJES50I", 1000],
-      "UK bonds": ["AUKGVAL", 1],
-      "US bonds": ["AUSGVAL", 1]
+      "Japan equities": ["TOKYOSE", 1000],
+      "UK gov bonds": ["AUKGVAL", 1],
+      "US gov bonds": ["AUSGVAL", 1],
+      "German gov bonds": ["TBDGVAL", 1],
+      "Japan gov bonds": ["AJPGVAL", 1]
     }
   },
   "parameters":
