@@ -34,7 +34,7 @@ aforementioned academic resources.
 
 ## Using the app
 
-![App image](resources\app_example.png)
+![App image](resources/app_example.png)
 
 1) The main chart shows the market portfolio allocation against the Black-Litterman
 allocation (if one or more view is defined)
