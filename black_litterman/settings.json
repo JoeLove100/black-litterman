@@ -4,7 +4,7 @@
     "source": "reuters",
     "file_path": "C:\\Users\\joelo\\Code\\black_litterman_data.xlsx",
     "first_date": "2017-01-02",
-    "last_date": "2020-03-31",
+    "last_date": "",
     "asset_universe":
     {
       "UK equities": ["FTSE100", 1000],

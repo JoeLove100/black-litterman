@@ -1,5 +1,7 @@
 import os
 import json
+import pandas as pd
+from datetime import datetime
 from typing import Any, Dict
 from black_litterman.constants import Configuration
 from black_litterman.domain.engine import BLEngine, CalculationSettings
@@ -24,6 +26,9 @@ class ConfigHandler:
             credentials = json.load(credentials_file)
 
         main_configuration[Configuration.CREDENTIALS] = credentials
+        if not main_configuration[Configuration.MARKET_DATA][Configuration.LAST_DATE]:
+            prev_date = (datetime.now() + pd.offsets.BusinessDay(-1)).strftime("%Y-%m-%d")
+            main_configuration[Configuration.MARKET_DATA][Configuration.LAST_DATE] = prev_date
         return main_configuration
 
     def _build_engine(self,
