@@ -50,3 +50,18 @@ market weights and covariances
 day.  You can also change the start date, which sets the window over which the covariance matrix
 is calculated.
 
+## Configuring views
+
+![View configuration](resources/view_config_example.png)
+
+* The confidence describes how sure you are of a view - this is converted
+into a covariance for the purposes of the model, as set out in the Idzorek
+paper
+
+* A view can be an absolute directional view on the performance of an asset, or 
+a view on the performance of one asset vs another.  Although the Black-Litterman model
+allows for views on *baskets* of assets, I have not had time to implement this here
+(chiefly due to challenges on the UI side)
+
+* You can select which asset(s) the view applies to - it is perfectly possible to have 
+multiple views involving the same asset
